@@ -96,7 +96,16 @@ module FixtureBuilder
       Date::DATE_FORMATS[:default] = Date::DATE_FORMATS[:db]
       begin
         fixtures = tables.inject([]) do |files, table_name|
-          table_klass = table_name.classify.constantize rescue nil
+
+          # HACK: support Noticed gem (i.e namespaced classes)
+          if table_name == 'noticed_events'
+            table_klass = Noticed::Event
+          elsif table_name == 'noticed_notifications'
+            table_klass = Noticed::Notification
+          else
+            table_klass = table_name.classify.constantize rescue nil
+          end
+
           if table_klass && table_klass < ActiveRecord::Base
             rows = table_klass.unscoped do
               table_klass.all.collect do |obj|
