@@ -138,7 +138,9 @@ module FixtureBuilder
 
     def serialized_value_if_needed(table_klass, attr_name, value)
       if table_klass.respond_to?(:type_for_attribute)
-        if table_klass.type_for_attribute(attr_name).type == :jsonb || table_klass.type_for_attribute(attr_name).type == :json
+        if table_klass.type_for_attribute(attr_name).respond_to? :coder
+          table_klass.type_for_attribute(attr_name).coder.dump(value)
+        elsif table_klass.type_for_attribute(attr_name).type == :jsonb || table_klass.type_for_attribute(attr_name).type == :json
           value
         elsif table_klass.type_for_attribute(attr_name).respond_to?(:serialize)
           table_klass.type_for_attribute(attr_name).serialize(value)
